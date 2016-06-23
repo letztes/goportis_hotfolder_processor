@@ -3,8 +3,6 @@
 use warnings;
 use strict;
 
-use Data::Dumper;
-
 use GoportisHotfolderProcessor;
 
 my $hotfolder = '/var/pdfaPilot/hotfolder';
