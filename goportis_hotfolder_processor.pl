@@ -7,7 +7,7 @@ use Data::Dumper;
 
 use GoportisHotfolderProcessor;
 
-my $hotfolder = '/home/spenglera/Schreibtisch/hotfolder';
+my $hotfolder = '/var/pdfaPilot/hotfolder';
 
 my @directories = GoportisHotfolderProcessor::get_directories(hotfolder => $hotfolder,);
 
