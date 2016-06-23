@@ -50,27 +50,30 @@ E.g introduction.pdf => introduction.pdf.processing
 =cut
 
 sub rename_pdfs {
-	my %args = @_;
-	my $directories_aref = $args{directories} || die('directories missing');
-	my $suffix           = $args{suffix}      || 'processing';
-	
-	my @directories = @{$directories_aref};
-	
-	my @full_file_names;
-	
-	foreach my $directory (@directories) {
-		opendir (my $dh, $directory) or die $!;
-		while (my $pdf_file = readdir $dh) {
-			next if ($pdf_file eq '.' or $pdf_file eq '..');
-			
-			rename("$directory/$pdf_file", "$directory/$pdf_file.$suffix");
-			push @full_file_names, "$directory/$pdf_file.$suffix";
-		}
-	}
-	# do the trick
-	
-	return @full_file_names;
+        my %args = @_;
+        my $directories_aref = $args{directories} || die('directories missing');
+        my $suffix           = $args{suffix}      || 'processing';
+
+        my @directories = @{$directories_aref};
+
+        my @full_file_names;
+
+        foreach my $directory (@directories) {
+                opendir (my $dh, $directory) or die $!;
+                while (my $pdf_file = readdir $dh) {
+                        #must skip .rsp files too. better skip everything but pdf
+                        #next if ($pdf_file eq '.' or $pdf_file eq '..');
+                        next if $pdf_file !~ /.pdf$/;
+
+                        rename("$directory/$pdf_file", "$directory/$pdf_file.$suffix");
+                        push @full_file_names, "$directory/$pdf_file.$suffix";
+                }
+        }
+        # do the trick
+
+        return @full_file_names;
 }
+
 
 =pod
 
@@ -84,39 +87,40 @@ Reports are written to /tmp/pdfaPilot_reports/.
 =cut
 	
 sub convert_pdfs {
-	my %args = @_;
-	my $full_file_names_aref = $args{full_file_names} || die('full_file_names missing'); # an arrayref of paths
-	my @full_file_names = @{$full_file_names_aref};
-	
-	# call pdfapilot with the config file on each full file name
-	foreach my $full_file_name (@full_file_names) {
-		
-		my ($inbox_file_name, $inbox_dir, $suffix) = fileparse($full_file_name);
-		
-		my $outbox_file_name = $inbox_file_name;
-		$outbox_file_name =~ s/.processing$//i;
-		
-		my $outbox_dir = $inbox_dir;
-		$outbox_dir =~ s/inbox/outbox/i;
-		
-		my $response_file_parameter = '';
-		if (-f $inbox_dir . 'config.rsp') {
-			$response_file_parameter = '@' . $inbox_dir . 'config.rsp';
-		}
-		
-		make_path($outbox_dir);
-		make_path('/tmp/pdfaPilot_reports/');
-		# qx(pdfaPilot $response_file_parameter --cachefolder=/tmp/ --report=PATH=/tmp/pdfaPilot_reports/$inbox_filename.html --ouputfile=$outbox_dir$outbox_filename $full_file_name);
-		
-		# if pdfaPilot returns numerical status values, add the successful
-		# ones into an array to return
-		
-		unlink($full_file_name);
-		
-	}
-	
-	return;
+        my %args = @_;
+        my $full_file_names_aref = $args{full_file_names} || die('full_file_names missing'); # an arrayref of paths
+        my @full_file_names = @{$full_file_names_aref};
+        
+        # call pdfapilot with the config file on each full file name
+        foreach my $full_file_name (@full_file_names) {
+        
+                my ($inbox_file_name, $inbox_dir, $suffix) = fileparse($full_file_name);
+        
+                my $outbox_file_name = $inbox_file_name;
+                $outbox_file_name =~ s/.processing$//i;
+        
+                my $outbox_dir = $inbox_dir;
+                $outbox_dir =~ s/inbox/outbox/i;
+        
+                my $response_file_parameter = '';
+                if (-f $inbox_dir . 'config.rsp') {
+                        $response_file_parameter = '@' . $inbox_dir . 'config.rsp';
+                }
+        
+                make_path($outbox_dir);
+                make_path('/tmp/pdfaPilot_reports/');
+                qx(pdfaPilot $response_file_parameter --cachefolder=/tmp/ --report=PATH=/tmp/pdfaPilot_reports/$outbox_file_name.html --outputfile=$outbox_dir$outbox_file_name $full_file_name);
+                        
+                # if pdfaPilot returns numerical status values, add the successful
+                # ones into an array to return
+        
+                unlink($full_file_name);
+        
+        }
+        
+        return;
 }
+
 
 
 
