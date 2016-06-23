@@ -106,7 +106,7 @@ sub convert_pdfs {
 		
 		make_path($outbox_dir);
 		make_path('/tmp/pdfaPilot_reports/');
-		qx(pdfaPilot $response_file_parameter --cachefolder=/tmp/ --report=PATH=/tmp/pdfaPilot_reports/$inbox_filename.html --ouputfile=$outbox_dir$outbox_filename $full_file_name);
+		# qx(pdfaPilot $response_file_parameter --cachefolder=/tmp/ --report=PATH=/tmp/pdfaPilot_reports/$inbox_filename.html --ouputfile=$outbox_dir$outbox_filename $full_file_name);
 		
 		# if pdfaPilot returns numerical status values, add the successful
 		# ones into an array to return
