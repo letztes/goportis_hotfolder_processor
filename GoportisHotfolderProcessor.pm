@@ -3,7 +3,6 @@ package GoportisHotfolderProcessor;
 use warnings;
 use strict;
 
-use Data::Dumper;
 use File::Basename;
 use File::Path qw(make_path);
 
@@ -108,10 +107,10 @@ sub convert_pdfs {
 
                 my $error_list;
                 make_path($outbox_dir, {error => \$error_list});
-                die Dumper $error_list if $error_list and scalar @$error_list;
+                die "error with $outbox_dir" if $error_list and scalar @$error_list;
                 
                 make_path('/tmp/pdfaPilot_reports', {error => \$error_list});
-                die Dumper $error_list if $error_list and scalar @$error_list;
+                die 'error with /tmp/pdfaPilot_reports' if $error_list and scalar @$error_list;
 
                 qx(/opt/pdfapilot/pdfaPilot $response_file_parameter --cachefolder=/tmp/ --report=PATH=/tmp/pdfaPilot_reports/$outbox_file_name.html --outputfile=$outbox_dir$outbox_file_name $full_file_name);
                         
