@@ -81,6 +81,7 @@ Convert the pdf files by calling pdfapilot on the file names.
 File names to read contain '.processing' as a suffix, file names
 to write do not.
 Reports are written to /tmp/pdfaPilot_reports/.
+Output of pdfaPilot script is written to /tmp/pdfaPilot_log.
 
 =cut
 	
@@ -88,6 +89,8 @@ sub convert_pdfs {
         my %args = @_;
         my $full_file_names_aref = $args{full_file_names} || die('full_file_names missing'); # an arrayref of paths
         my @full_file_names = @{$full_file_names_aref};
+        
+        my @successful_file_names; # with the temporary file name suffix
         
         # call pdfapilot with the config file on each full file name
         foreach my $full_file_name (@full_file_names) {
@@ -114,14 +117,19 @@ sub convert_pdfs {
                 die 'error with /tmp/pdfaPilot_reports' if $error_list and scalar @$error_list;
 
                 qx(/opt/pdfapilot/pdfaPilot $response_file_parameter --cachefolder=/tmp/ --report=PATH=/tmp/pdfaPilot_reports/$outbox_file_name.html --outputfile=$outbox_dir$outbox_file_name $quoted_full_file_name);
-                                
-                # if pdfaPilot returns numerical status values, add the successful
-                # ones into an array to return
+
+				# $? contains the return value, usually text.
+				# shifted by 8 bytes one can get the exit status.
+				# exit status 0 is good, everything else is bad.
+				if (not $? >> 8) {
+					push @successful_file_names, $full_file_name;
+				}
+				
                 unlink($full_file_name) or die $!; 
         
         }
         
-        return;
+        return @successful_file_names;
 }
 
 

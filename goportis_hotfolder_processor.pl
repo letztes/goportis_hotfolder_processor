@@ -11,7 +11,8 @@ my @directories = GoportisHotfolderProcessor::get_directories(hotfolder => $hotf
 
 my @full_file_names = GoportisHotfolderProcessor::rename_pdfs(directories => \@directories, suffix => 'processing',);
 
-my $result = GoportisHotfolderProcessor::convert_pdfs(full_file_names => \@full_file_names,);
+# renamed file names
+my @successful_file_names = GoportisHotfolderProcessor::convert_pdfs(full_file_names => \@full_file_names,);
 
 
 
