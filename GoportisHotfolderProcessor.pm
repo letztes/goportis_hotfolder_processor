@@ -116,7 +116,7 @@ sub convert_pdfs {
                 make_path('/tmp/pdfaPilot_reports', {error => \$error_list});
                 die 'error with /tmp/pdfaPilot_reports' if $error_list and scalar @$error_list;
 
-                qx(/opt/pdfapilot/pdfaPilot $response_file_parameter --cachefolder=/tmp/ --report=PATH=/tmp/pdfaPilot_reports/$outbox_file_name.html --outputfile=$outbox_dir$outbox_file_name $quoted_full_file_name >> /tmp/pdfaPilot_log 2>&1);
+                qx(date >> /tmp/pdfaPilot_log; /opt/pdfapilot/pdfaPilot $response_file_parameter --cachefolder=/tmp/ --report=PATH=/tmp/pdfaPilot_reports/$outbox_file_name.html --outputfile=$outbox_dir$outbox_file_name $quoted_full_file_name >> /tmp/pdfaPilot_log 2>&1);
 
 				# $? contains the return value, usually text.
 				# shifted by 8 bytes one can get the exit status.
