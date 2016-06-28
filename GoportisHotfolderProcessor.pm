@@ -92,9 +92,10 @@ sub convert_pdfs {
         # call pdfapilot with the config file on each full file name
         foreach my $full_file_name (@full_file_names) {
         
-                my ($inbox_file_name, $inbox_dir, $suffix) = fileparse($full_file_name);
+                my ($inbox_file_name, $inbox_dir, $suffix) = fileparse($full_file_name, qr/\.pdf(?:\.[^.]+)?/);
         
-                my $outbox_file_name = $inbox_file_name;
+                my $outbox_file_name = quotemeta($inbox_file_name) . $suffix;
+                my $quoted_full_file_name = $inbox_dir . $outbox_file_name;
                 $outbox_file_name =~ s/.processing$//i;
         
                 my $outbox_dir = $inbox_dir;
@@ -108,21 +109,21 @@ sub convert_pdfs {
                 my $error_list;
                 make_path($outbox_dir, {error => \$error_list});
                 die "error with $outbox_dir" if $error_list and scalar @$error_list;
-                
+        
                 make_path('/tmp/pdfaPilot_reports', {error => \$error_list});
                 die 'error with /tmp/pdfaPilot_reports' if $error_list and scalar @$error_list;
 
-                qx(/opt/pdfapilot/pdfaPilot $response_file_parameter --cachefolder=/tmp/ --report=PATH=/tmp/pdfaPilot_reports/$outbox_file_name.html --outputfile=$outbox_dir$outbox_file_name $full_file_name);
-                        
+                qx(/opt/pdfapilot/pdfaPilot $response_file_parameter --cachefolder=/tmp/ --report=PATH=/tmp/pdfaPilot_reports/$outbox_file_name.html --outputfile=$outbox_dir$outbox_file_name $quoted_full_file_name);
+                                
                 # if pdfaPilot returns numerical status values, add the successful
                 # ones into an array to return
-        
-                unlink($full_file_name) or die $!;
+                unlink($full_file_name) or die $!; 
         
         }
         
         return;
 }
+
 
 
 
