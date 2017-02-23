@@ -89,7 +89,7 @@ sub convert_pdfs {
         my @successful_file_names; # with the temporary file name suffix
         
         # call pdfapilot with the config file on each full file name
-        foreach my $  (@full_file_names) {
+        foreach my $full_file_name (@full_file_names) {
         
                 my ($inbox_file_name, $inbox_dir, $suffix) = fileparse($full_file_name, '.pdf.processing');
         
