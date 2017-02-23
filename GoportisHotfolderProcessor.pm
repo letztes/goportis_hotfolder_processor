@@ -51,23 +51,19 @@ E.g introduction.pdf => introduction.pdf.processing
 
 sub rename_pdfs {
         my %args = @_;
-        my $directories_aref = $args{directories} || die('directories missing');
-        my $suffix           = $args{suffix}      || 'processing';
-
-        my @directories = @{$directories_aref};
+        my $hotfolder_inbox  = $args{hotfolder_inbox} || die('hotfolder_inbox missing');
+        my $suffix           = $args{suffix}          || 'processing';
 
         my @full_file_names;
 
-        foreach my $directory (@directories) {
-                opendir (my $dh, $directory) or die $!;
-                while (my $pdf_file = readdir $dh) {
+		opendir (my $dh, $hotfolder_inbox) or die $!;
+		while (my $pdf_file = readdir $dh) {
 
-                        #skip everything but pdf
-                        next if $pdf_file !~ /.pdf$/;
-                        rename("$directory/$pdf_file", "$directory/$pdf_file.$suffix") or die $!;
-                        push @full_file_names, "$directory/$pdf_file.$suffix";
-                }
-        }
+				#skip everything but pdf
+				next if $pdf_file !~ /.pdf$/;
+				rename("$hotfolder_inbox/$pdf_file", "$hotfolder_inbox/$pdf_file.$suffix") or die $!;
+				push @full_file_names, "$hotfolder_inbox/$pdf_file.$suffix";
+		}
 
         return @full_file_names;
 }
@@ -80,7 +76,7 @@ sub rename_pdfs {
 Convert the pdf files by calling pdfapilot on the file names.
 File names to read contain '.processing' as a suffix, file names
 to write do not.
-Reports are written to /tmp/pdfaPilot_reports/.
+Reports are written to ~/pdfaPilot_reports/.
 Output of pdfaPilot script is written to /tmp/pdfaPilot_log.
 
 =cut
@@ -93,9 +89,9 @@ sub convert_pdfs {
         my @successful_file_names; # with the temporary file name suffix
         
         # call pdfapilot with the config file on each full file name
-        foreach my $full_file_name (@full_file_names) {
+        foreach my $  (@full_file_names) {
         
-                my ($inbox_file_name, $inbox_dir, $suffix) = fileparse($full_file_name, qr/\.pdf(?:\.[^.]+)?/);
+                my ($inbox_file_name, $inbox_dir, $suffix) = fileparse($full_file_name, '.pdf.processing');
         
                 my $outbox_file_name = quotemeta($inbox_file_name) . $suffix;
                 my $quoted_full_file_name = $inbox_dir . $outbox_file_name;
@@ -113,10 +109,10 @@ sub convert_pdfs {
                 make_path($outbox_dir, {error => \$error_list});
                 die "error with $outbox_dir" if $error_list and scalar @$error_list;
         
-                make_path('/tmp/pdfaPilot_reports', {error => \$error_list});
-                die 'error with /tmp/pdfaPilot_reports' if $error_list and scalar @$error_list;
+                make_path($ENV{"HOME"} . '/pdfaPilot_reports', {error => \$error_list});
+                die 'error with ' . $ENV{"HOME"} . '/pdfaPilot_reports' if $error_list and scalar @$error_list;
 
-                qx(date >> /tmp/pdfaPilot_log; /opt/pdfapilot/pdfaPilot $response_file_parameter --cachefolder=/tmp/ --report=PATH=/tmp/pdfaPilot_reports/$outbox_file_name.html --outputfile=$outbox_dir$outbox_file_name $quoted_full_file_name >> /tmp/pdfaPilot_log 2>&1);
+                qx(date >> \$HOME/pdfaPilot_log; \$HOME/pdfapilot/pdfaPilot $response_file_parameter --cachefolder=/tmp/ --report=PATH=\$HOME/pdfaPilot_reports/$outbox_file_name.html --outputfile=$outbox_dir$outbox_file_name $quoted_full_file_name >> \$HOME/pdfaPilot_log 2>&1);
 
 				# $? contains the return value, usually text.
 				# shifted by 8 bytes one can get the exit status.
